@@ -1,3 +1,8 @@
+/*
+ * AUTHORS: Wissam kabha
+ * gitHub: https://github.com/Wissam111
+ * Date: 05/2022
+ */
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -8,7 +13,7 @@ using namespace ariel;
 #include "doctest.h"
 TEST_CASE("not valid  input test case")
 {
-    OrgChart<string> organization;
+    OrgChart organization;
     organization.add_root("CEO")
         .add_sub("CEO", "CTO")
         .add_sub("CEO", "CFO")
@@ -25,7 +30,7 @@ TEST_CASE("not valid  input test case")
 
 TEST_CASE("valid input")
 {
-    OrgChart<string> organization;
+    OrgChart organization;
     organization.add_root("CEO")
         .add_sub("CEO", "CTO")
         .add_sub("CEO", "CFO")
@@ -46,7 +51,7 @@ TEST_CASE("valid input")
         i++;
     }
     i = 0;
-    for (auto it = organization.begin_reverse_order(); it != organization.end_reverse_order(); ++it)
+    for (auto it = organization.begin_reverse_order(); it != organization.reverse_order(); ++it)
     {
         CHECK(*it == vec_revOrder[i]);
         i++;

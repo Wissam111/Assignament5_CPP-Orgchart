@@ -1,3 +1,9 @@
+
+/*
+ * AUTHORS: Wissam kabha
+ * gitHub: https://github.com/Wissam111
+ * Date: 05/2022
+ */
 #pragma once
 #include <iostream>
 #include <fstream>
@@ -7,7 +13,7 @@
 #include <queue>
 #include <stack>
 #include <algorithm>
-using namespace std;
+// using namespace std;
 
 enum ORDER
 {
@@ -19,17 +25,17 @@ enum ORDER
 namespace ariel
 {
 
-    template <typename T>
     class OrgChart
     {
 
+        /*--------struct represents node in the tree--------*/
         struct Node
         {
-            T key;
+            std::string key;
             std::vector<Node *> node_children;
         };
 
-        Node *createNode(T key)
+        static Node *createNode(std::string const &key)
         {
             Node *temp = new Node;
             temp->key = key;
@@ -45,49 +51,19 @@ namespace ariel
 
             Iterator(ORDER order, Node *root) : curr_index(0)
             {
-
                 fill(order, root);
                 vec_order.push_back(nullptr);
             }
-            void fill(ORDER order, Node *root)
-            {
 
-                if (order == LEVEL_ORDER)
-                {
-                    fill_lvlOrder(root);
-                }
-                if (order == REVERSE_ORDER)
-                {
-                    fill_revOrder(root);
-                }
-                if (order == PREORDER)
-                {
-                    fill_preOrder(root);
-                }
-            }
-            Iterator &operator++()
-            {
-                curr_index++;
-                return *this;
-            }
-            T &operator*() const
-            {
-                return vec_order[curr_index]->key;
-            }
+            /*--------iterator operations--------*/
+            Iterator &operator++();
+            std::string &operator*() const;
+            bool operator==(Iterator const &otherIter) const;
+            bool operator!=(Iterator const &otherIter) const;
+            std::string *operator->() const;
 
-            bool operator==(Iterator const &otherIter) const
-            {
-                return vec_order[curr_index] == otherIter.vec_order[otherIter.curr_index];
-            }
-            bool operator!=(Iterator const &otherIter) const
-            {
-                return !(*this == otherIter);
-            }
-
-            T *operator->() const
-            {
-                return &vec_order.at(curr_index)->key;
-            }
+            /*--------filling the iterator vector--------*/
+            void fill(ORDER order, Node *root);
             void fill_lvlOrder(Node *root);
             void fill_preOrder(Node *root);
             void fill_revOrder(Node *root);
@@ -98,160 +74,49 @@ namespace ariel
 
     public:
         OrgChart() : _root(nullptr){};
-        // ~OrgChart();
+        ~OrgChart() { deleteTree(_root); }
+
+        /*--------Move constructors and move assignment For Make Tidy--------*/
+        OrgChart(const OrgChart &a) = delete;
+        OrgChart &operator=(const OrgChart &a) = delete;
+        OrgChart(OrgChart &&a) noexcept
+            : _root(a._root)
+        {
+            a._root = nullptr;
+        }
+        OrgChart &operator=(OrgChart &&a) noexcept
+        {
+            if (&a == this)
+            {
+                return *this;
+            }
+            delete _root;
+            _root = a._root;
+            a._root = nullptr;
+            return *this;
+        }
 
         /*--------searching for element--------*/
-        Node *getNode(Node *root, T const &key)
-        {
+        Node *getNode(Node *root, std::string const &key);
 
-            Iterator itr{LEVEL_ORDER, root};
-
-            for (unsigned i = 0; i < itr.vec_order.size() - 1; i++)
-            {
-
-                if (itr.vec_order[i]->key == key)
-                {
-                    return itr.vec_order[i];
-                }
-            }
-            throw invalid_argument("Invalid operations!");
-        }
         /*--------adding elements--------*/
-        OrgChart &add_root(T const &new_r);
-        OrgChart &add_sub(T const &n1, T const &n2);
+        OrgChart &add_root(std::string const &new_r);
+        OrgChart &add_sub(std::string const &n1, std::string const &n2);
 
         /*--------Iterator traverse--------*/
         auto begin_level_order() { return Iterator(LEVEL_ORDER, _root); }
-        auto end_level_order() { return Iterator(LEVEL_ORDER, nullptr); }
+        static auto end_level_order() { return Iterator(LEVEL_ORDER, nullptr); }
         auto begin_reverse_order() { return Iterator(REVERSE_ORDER, _root); };
-        auto end_reverse_order() { return Iterator(REVERSE_ORDER, nullptr); };
+        static auto reverse_order() { return Iterator(REVERSE_ORDER, nullptr); };
         auto begin_preorder() { return Iterator(PREORDER, _root); }
-        auto end_preorder() { return Iterator(PREORDER, nullptr); }
+        static auto end_preorder() { return Iterator(PREORDER, nullptr); }
+        auto begin() { return begin_level_order(); }
+        static auto end() { return end_level_order(); }
+
         /*--------output operator--------*/
-        template <typename E>
-        friend std::ostream &operator<<(std::ostream &out, OrgChart<E> const &orgChart)
-        {
-            std::string str;
+        friend std::ostream &operator<<(std::ostream &out, OrgChart const &orgChart);
 
-            std::queue<Node *> q;
-            q.push(orgChart._root);
-            str += "        " + orgChart._root->key + "        \n";
-            while (!q.empty())
-            {
-
-                Node *temp = q.front();
-                q.pop();
-                for (unsigned i = 0; i < temp->node_children.size(); i++)
-                {
-
-                    q.push(temp->node_children[i]);
-                    str += temp->node_children[i]->key + "-----";
-                }
-                str += "\n";
-            }
-
-            out << str;
-            return out;
-        }
+        /*--------deleting the tree--------*/
+        void deleteTree(Node *root);
     };
-
-    template <typename T>
-    OrgChart<T> &OrgChart<T>::add_root(T const &new_r)
-    {
-        if (_root)
-        {
-            _root->key = new_r;
-        }
-        else
-        {
-            _root = createNode(new_r);
-        }
-
-        return *this;
-    }
-    template <typename T>
-    OrgChart<T> &OrgChart<T>::add_sub(T const &n1, T const &n2)
-    {
-
-        Node *temp = getNode(_root, n1);
-        temp->node_children.push_back(createNode(n2));
-        return *this;
-    }
-
-    template <typename T>
-    void OrgChart<T>::Iterator::fill_lvlOrder(Node *root)
-    {
-        if (!root)
-        {
-            return;
-        }
-        std::queue<Node *> q;
-        q.push(root);
-        while (!q.empty())
-        {
-
-            Node *temp = q.front();
-            vec_order.push_back(temp);
-            q.pop();
-
-            for (unsigned i = 0; i < temp->node_children.size(); i++)
-            {
-                q.push(temp->node_children[i]);
-            }
-        }
-    }
-
-    template <typename T>
-    void OrgChart<T>::Iterator::fill_revOrder(Node *root)
-    {
-        if (!root)
-        {
-            return;
-        }
-        std::queue<Node *> q;
-        std::stack<Node *> s;
-        q.push(root);
-        while (!q.empty())
-        {
-            int sz = q.size();
-            Node *temp = q.front();
-            q.pop();
-            s.push(temp);
-            std::reverse(temp->node_children.begin(), temp->node_children.end());
-            for (unsigned i = 0; i < temp->node_children.size(); i++)
-            {
-                q.push(temp->node_children[i]);
-            }
-        }
-        while (!s.empty())
-        {
-            vec_order.push_back(s.top());
-            s.pop();
-        }
-    }
-    template <typename T>
-    void OrgChart<T>::Iterator::fill_preOrder(Node *root)
-    {
-        if (!root)
-        {
-            return;
-        }
-
-        std::stack<Node *> s;
-        s.push(root);
-
-        while (!s.empty())
-        {
-
-            Node *temp = s.top();
-            s.pop();
-            vec_order.push_back(temp);
-
-            for (unsigned i = 0; i < temp->node_children.size(); i++)
-            {
-                s.push(temp->node_children[i]);
-            }
-        }
-    }
-
 }
