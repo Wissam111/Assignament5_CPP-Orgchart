@@ -13,7 +13,6 @@
 #include <queue>
 #include <stack>
 #include <algorithm>
-// using namespace std;
 
 enum ORDER
 {
@@ -33,6 +32,7 @@ namespace ariel
         {
             std::string key;
             std::vector<Node *> node_children;
+            int lvl = 0;
         };
 
         static Node *createNode(std::string const &key)
@@ -48,7 +48,6 @@ namespace ariel
         public:
             std::vector<Node *> vec_order;
             unsigned curr_index;
-
             Iterator(ORDER order, Node *root) : curr_index(0)
             {
                 fill(order, root);
@@ -84,18 +83,7 @@ namespace ariel
         {
             a._root = nullptr;
         }
-        OrgChart &operator=(OrgChart &&a) noexcept
-        {
-            if (&a == this)
-            {
-                return *this;
-            }
-            delete _root;
-            _root = a._root;
-            a._root = nullptr;
-            return *this;
-        }
-
+        OrgChart &operator=(OrgChart &&a) noexcept;
         /*--------searching for element--------*/
         Node *getNode(Node *root, std::string const &key);
 
@@ -110,8 +98,15 @@ namespace ariel
         static auto reverse_order() { return Iterator(REVERSE_ORDER, nullptr); };
         auto begin_preorder() { return Iterator(PREORDER, _root); }
         static auto end_preorder() { return Iterator(PREORDER, nullptr); }
-        auto begin() { return begin_level_order(); }
-        static auto end() { return end_level_order(); }
+
+        auto begin()
+        {
+            return begin_level_order();
+        }
+        static auto end()
+        {
+            return end_level_order();
+        }
 
         /*--------output operator--------*/
         friend std::ostream &operator<<(std::ostream &out, OrgChart const &orgChart);

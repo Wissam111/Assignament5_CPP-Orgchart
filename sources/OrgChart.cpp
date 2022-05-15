@@ -20,6 +20,7 @@ namespace ariel
         {
             _root = createNode(new_r);
         }
+        _root->lvl = 0;
 
         return *this;
     }
@@ -31,7 +32,9 @@ namespace ariel
     {
 
         Node *temp = getNode(_root, n1);
-        temp->node_children.push_back(createNode(n2));
+        Node *new_Node = createNode(n2);
+        temp->node_children.push_back(new_Node);
+        new_Node->lvl = temp->lvl + 1;
         return *this;
     }
 
@@ -42,21 +45,16 @@ namespace ariel
     {
         std::string str;
 
-        std::queue<OrgChart::Node *> q;
-        q.push(orgChart._root);
-        str += "        " + orgChart._root->key + "        \n";
-        while (!q.empty())
+        OrgChart ::Iterator itr{LEVEL_ORDER, orgChart._root};
+        int currentLvl = 0;
+        for (unsigned i = 0; i < itr.vec_order.size() - 1; i++)
         {
-
-            OrgChart::Node *temp = q.front();
-            q.pop();
-            for (unsigned i = 0; i < temp->node_children.size(); i++)
+            if (currentLvl != itr.vec_order[i]->lvl)
             {
-
-                q.push(temp->node_children[i]);
-                str += temp->node_children[i]->key + "-----";
+                currentLvl = itr.vec_order[i]->lvl;
+                str += "\n";
             }
-            str += "\n";
+            str += itr.vec_order[i]->key + "     ";
         }
 
         out << str;
@@ -98,6 +96,18 @@ namespace ariel
 
             delete itr.vec_order[i];
         }
+    }
+
+    OrgChart &OrgChart::operator=(OrgChart &&a) noexcept
+    {
+        if (&a == this)
+        {
+            return *this;
+        }
+        delete _root;
+        _root = a._root;
+        a._root = nullptr;
+        return *this;
     }
 
     /*-------------iterator class implementation-------------*/
