@@ -7,12 +7,19 @@
 #include "OrgChart.hpp"
 namespace ariel
 {
+
     /*
      * @brief adding/changing the root Node
      */
     OrgChart &OrgChart::add_root(std::string const &new_r)
     {
-        if (_root)
+
+        if (new_r.empty())
+        {
+            throw std::invalid_argument("Invalid operations!");
+        }
+
+        if (_root != nullptr)
         {
             _root->key = new_r;
         }
@@ -31,10 +38,16 @@ namespace ariel
     OrgChart &OrgChart::add_sub(std::string const &n1, std::string const &n2)
     {
 
+        if (n1.empty() || n2.empty())
+        {
+            throw std::invalid_argument("Invalid operations!");
+        }
+
         Node *temp = getNode(_root, n1);
         Node *new_Node = createNode(n2);
         temp->node_children.push_back(new_Node);
         new_Node->lvl = temp->lvl + 1;
+
         return *this;
     }
 
@@ -85,7 +98,7 @@ namespace ariel
      */
     void OrgChart::deleteTree(Node *root)
     {
-        if (!root)
+        if (root == nullptr)
         {
             return;
         }
@@ -114,6 +127,7 @@ namespace ariel
 
     void OrgChart::Iterator::fill(ORDER order, Node *root)
     {
+
         if (order == LEVEL_ORDER)
         {
             fill_lvlOrder(root);
@@ -132,10 +146,12 @@ namespace ariel
      */
     void OrgChart ::Iterator::fill_lvlOrder(Node *root)
     {
-        if (!root)
+
+        if (root == nullptr)
         {
             return;
         }
+
         std::queue<Node *> q;
         q.push(root);
         while (!q.empty())
@@ -157,23 +173,25 @@ namespace ariel
      */
     void OrgChart ::Iterator::fill_revOrder(Node *root)
     {
-        if (!root)
+        if (root == nullptr)
         {
             return;
         }
+        std::vector<Node *> tempVec;
         std::queue<Node *> q;
         std::stack<Node *> s;
         q.push(root);
         while (!q.empty())
         {
-            int sz = q.size();
+
             Node *temp = q.front();
             q.pop();
             s.push(temp);
-            std::reverse(temp->node_children.begin(), temp->node_children.end());
+            tempVec = temp->node_children;
+            std::reverse(tempVec.begin(), tempVec.end());
             for (unsigned i = 0; i < temp->node_children.size(); i++)
             {
-                q.push(temp->node_children[i]);
+                q.push(tempVec[i]);
             }
         }
         while (!s.empty())
@@ -188,11 +206,12 @@ namespace ariel
      */
     void OrgChart::Iterator::fill_preOrder(Node *root)
     {
-        if (!root)
+        if (root == nullptr)
         {
             return;
         }
 
+        std::vector<Node *> tempVec;
         std::stack<Node *> s;
         s.push(root);
 
@@ -202,10 +221,11 @@ namespace ariel
             Node *temp = s.top();
             s.pop();
             vec_order.push_back(temp);
-
+            tempVec = temp->node_children;
+            std::reverse(tempVec.begin(), tempVec.end());
             for (unsigned i = 0; i < temp->node_children.size(); i++)
             {
-                s.push(temp->node_children[i]);
+                s.push(tempVec[i]);
             }
         }
     }

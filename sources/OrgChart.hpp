@@ -48,6 +48,7 @@ namespace ariel
         public:
             std::vector<Node *> vec_order;
             unsigned curr_index;
+
             Iterator(ORDER order, Node *root) : curr_index(0)
             {
                 fill(order, root);
@@ -85,33 +86,64 @@ namespace ariel
         }
         OrgChart &operator=(OrgChart &&a) noexcept;
         /*--------searching for element--------*/
-        Node *getNode(Node *root, std::string const &key);
+        static Node *getNode(Node *root, std::string const &key);
 
         /*--------adding elements--------*/
         OrgChart &add_root(std::string const &new_r);
         OrgChart &add_sub(std::string const &n1, std::string const &n2);
 
         /*--------Iterator traverse--------*/
-        auto begin_level_order() { return Iterator(LEVEL_ORDER, _root); }
-        static auto end_level_order() { return Iterator(LEVEL_ORDER, nullptr); }
-        auto begin_reverse_order() { return Iterator(REVERSE_ORDER, _root); };
-        static auto reverse_order() { return Iterator(REVERSE_ORDER, nullptr); };
-        auto begin_preorder() { return Iterator(PREORDER, _root); }
-        static auto end_preorder() { return Iterator(PREORDER, nullptr); }
-
+        auto begin_level_order()
+        {
+            checkThrows();
+            return Iterator(LEVEL_ORDER, _root);
+        }
+        auto end_level_order()
+        {
+            checkThrows();
+            return Iterator(LEVEL_ORDER, nullptr);
+        }
+        auto begin_reverse_order()
+        {
+            checkThrows();
+            return Iterator(REVERSE_ORDER, _root);
+        };
+        auto reverse_order()
+        {
+            checkThrows();
+            return Iterator(REVERSE_ORDER, nullptr);
+        };
+        auto begin_preorder()
+        {
+            checkThrows();
+            return Iterator(PREORDER, _root);
+        }
+        auto end_preorder()
+        {
+            checkThrows();
+            return Iterator(PREORDER, nullptr);
+        }
         auto begin()
         {
             return begin_level_order();
         }
-        static auto end()
+        auto end()
         {
             return end_level_order();
+        }
+
+        void checkThrows()
+        {
+            if (_root == nullptr)
+            {
+                throw std::invalid_argument("Invalid operations!");
+            }
         }
 
         /*--------output operator--------*/
         friend std::ostream &operator<<(std::ostream &out, OrgChart const &orgChart);
 
         /*--------deleting the tree--------*/
-        void deleteTree(Node *root);
+        static void deleteTree(Node *root);
     };
 }
